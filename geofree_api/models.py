@@ -1,6 +1,8 @@
 from django.contrib.gis.db import models
 from django.contrib.gis.geos import Point
 
+
+
 # Create your models here.
 
 def upload_path(instance, filename):
@@ -16,6 +18,8 @@ class Item(models.Model):
     # increase max length
     condition = models.CharField(max_length= 20, null=True)
     point = models.PointField(null=True)
+    views = models.IntegerField(default=0, null=True)
+    likes = models.IntegerField(default=0, null=True)
 
     def save(self, *args, **kwargs):
         if self.latitude and self.longitude:

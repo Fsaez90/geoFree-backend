@@ -34,7 +34,7 @@ def itemCreate(request):
 
 
 
-@api_view(['PUT'])
+@api_view(['PUT', 'GET'])
 def itemUpdate(request, pk):
     try:
         item = Item.objects.get(id=pk)
@@ -74,6 +74,64 @@ def itemListDistance(request):
     serializer = ItemSerializers(objects, many=True)
     # Return the serialized objects
     return Response(serializer.data)
+
+#views-increment-update
+@api_view(['GET'])
+def viewsUpdate(request, pk):
+    try:
+        item = Item.objects.get(id=pk)
+    except Item.DoesNotExist:
+        return Response({'error': 'Item does not exist'})
+
+    serializer = ItemSerializers(instance=item, data=request.data, partial=True)
+    
+    if serializer.is_valid():
+        item.views += 1  # increment the views field by 1
+        item.save()  # save the updated instance to the database
+        serializer.save()  # update the instance with the serializer data
+        return Response(serializer.data)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+#views-increment-update
+@api_view(['GET'])
+def likesUpdate(request, pk):
+    try:
+        item = Item.objects.get(id=pk)
+    except Item.DoesNotExist:
+        return Response({'error': 'Item does not exist'})
+
+    serializer = ItemSerializers(instance=item, data=request.data, partial=True)
+    
+    if serializer.is_valid():
+        item.likes += 1  # increment the views field by 1
+        item.save()  # save the updated instance to the database
+        serializer.save()  # update the instance with the serializer data
+        return Response(serializer.data)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+def dislikeUpdate(request, pk):
+    try:
+        item = Item.objects.get(id=pk)
+    except Item.DoesNotExist:
+        return Response({'error': 'Item does not exist'})
+
+    serializer = ItemSerializers(instance=item, data=request.data, partial=True)
+    
+    if serializer.is_valid():
+        item.likes -= 1  # increment the views field by 1
+        if item.likes > 0:
+            item.save()  # save the updated instance to the database
+            serializer.save()
+        else:
+            item.likes = 0
+            item.save()
+            serializer.save()  # update the instance with the serializer data
+        return Response(serializer.data)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
