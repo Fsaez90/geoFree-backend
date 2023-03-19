@@ -16,7 +16,7 @@ class ItemSerializers(serializers.HyperlinkedModelSerializer):
     available = serializers.BooleanField(default=True)
     class Meta:
         model =  Item
-        fields = ['id', 'title', 'description', 'available', 'latitude', 'longitude', 'condition', 'images', 'uploaded_images']
+        fields = ['id', 'title', 'description', 'available', 'latitude', 'longitude', 'point', 'condition', 'images', 'uploaded_images']
     
     def create(self, validated_data):
         uploaded_images = validated_data.pop("uploaded_images")

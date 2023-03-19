@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-$1*0dhot8+e+jhu$o%hs87*kgb0&b1gh-ctfzgg!%bia+230fs'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', 'geofree.pythonanywhere.com']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'geofree.pythonanywhere.com']
 
 
 # Application definition
@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'geofree_api.apps.GeofreeApiConfig',
     'rest_framework',
     'corsheaders',
+    'django.contrib.gis',
+    
     
 ]
 
@@ -81,7 +83,7 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
+        'ENGINE': 'django.contrib.gis.db.backends.spatialite',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
