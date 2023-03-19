@@ -9,4 +9,5 @@ urlpatterns = [
     path('item-create/', views.itemCreate, name="item-create"),
     path('item-update/<str:pk>', views.itemUpdate, name="item-update"),
     path('item-delete/<str:pk>', views.itemDelete, name="item-delete"),
+    path('item-list-distance/', views.itemListDistance, name="item-list-distance"),
 ]
