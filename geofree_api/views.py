@@ -1,4 +1,5 @@
 from .models import Item
+from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .serializers import ItemSerializers
@@ -32,13 +33,20 @@ def itemCreate(request):
     return Response({"status": "Item succesfully created"})
 
 
-@api_view(['POST', 'GET'])
+
+@api_view(['PUT'])
 def itemUpdate(request, pk):
-    item = Item.objects.get(id=pk)
-    serializer = ItemSerializers(instance=item, data=request.data)
+    try:
+        item = Item.objects.get(id=pk)
+    except Item.DoesNotExist:
+        return Response({'error': 'Item does not exist'})
+
+    serializer = ItemSerializers(instance=item, data=request.data, partial=True)
     if serializer.is_valid():
         serializer.save()
-    return Response(serializer.data)
+        return Response(serializer.data)
+    else:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
      
 
