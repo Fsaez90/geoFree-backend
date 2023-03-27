@@ -1,8 +1,9 @@
-from .models import Item
+from .models import Item, Categories
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .serializers import ItemSerializers
+from .serializers import ItemSerializers, CategorySerializers
+from django.db.models import Q
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
 # Create your views here.
@@ -56,7 +57,7 @@ def itemDelete(request, pk):
     item.delete()
     return Response("ITEM DELETED")
 
-#GETTING ITEMS BASED ON DISTANCE QUERY
+# GETTING ITEMS BASED ON DISTANCE QUERY
 @api_view(['GET'])
 def itemListDistance(request):
     # Get latitude and longitude from request parameters
@@ -73,6 +74,28 @@ def itemListDistance(request):
     # Serialize the objects
     serializer = ItemSerializers(objects, many=True)
     # Return the serialized objects
+    return Response(serializer.data)
+
+
+@api_view(['GET'])
+def itemListCategories(request):
+    queryset = Item.objects.all()
+
+    # Obtenemos las palabras de búsqueda desde los parámetros de la solicitud
+    search_categories = request.query_params.get('categories', None)
+    
+    if search_categories:
+        # Convertimos las palabras de búsqueda en una lista de categorías
+        categories = search_categories.split(',')
+
+        # Creamos una consulta que busque cualquier artículo que tenga al menos una categoría que coincida con las palabras de búsqueda
+        category_query = Q()
+        for category in categories:
+            category_query |= Q(categories__contains=category)
+        
+        queryset = queryset.filter(category_query)
+
+    serializer = ItemSerializers(queryset, many=True)
     return Response(serializer.data)
 
 #views-increment-update
@@ -135,3 +158,15 @@ def dislikeUpdate(request, pk):
 
 
 
+@api_view(['POST'])
+def categoryCreate(request):
+    serializer = CategorySerializers(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+    return Response({"status": "Category succesfully created"})
+
+@api_view(['GET'])
+def getCategories(request):
+    items = Categories.objects.all()
+    serializer = CategorySerializers(items, many=True)
+    return Response(serializer.data)
