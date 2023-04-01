@@ -32,10 +32,12 @@ class ItemSerializers(serializers.HyperlinkedModelSerializer):
 
     categories = CategoriesField()
     available = serializers.BooleanField(default=True)
+    item_age = serializers.ReadOnlyField()
+
     class Meta:
         model =  Item
-        fields = ['id', 'title', 'description', 'available', 'latitude', 'longitude', 'condition', 'categories', 'point', 'views', 'likes','images', 'uploaded_images']
-    
+        fields = ['id', 'title', 'description', 'available', 'timedate_creation', 'item_age', 'category_ml', 'latitude', 'longitude', 'point', 'condition', 'categories', 'views', 'likes', 'images', 'uploaded_images']
+        
     def create(self, validated_data):
         uploaded_images = validated_data.pop("uploaded_images")
         item = Item.objects.create(**validated_data)

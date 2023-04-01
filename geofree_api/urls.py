@@ -16,4 +16,5 @@ urlpatterns = [
     path('get-categories/', views.getCategories, name="get-categories"),
     path('item-categories-list/', views.itemListCategories, name="list-categories"),
     path('item-list-distance/', views.itemListDistance, name="item-list-distance"),
+    path('item-user-distance/', views.calculate_distance, name ="distance-user")
 ]

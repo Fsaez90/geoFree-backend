@@ -4,8 +4,10 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .serializers import ItemSerializers, CategorySerializers
 from django.db.models import Q
+from math import radians, cos, sin, asin, sqrt
 from django.contrib.gis.geos import Point
 from django.contrib.gis.db.models.functions import Distance
+from django.contrib.gis.measure import D
 # Create your views here.
 
 #Item CRUD Handles
@@ -33,8 +35,6 @@ def itemCreate(request):
         serializer.save()
     return Response({"status": "Item succesfully created"})
 
-
-
 @api_view(['PUT', 'GET'])
 def itemUpdate(request, pk):
     try:
@@ -49,15 +49,42 @@ def itemUpdate(request, pk):
     else:
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-     
-
 @api_view(['DELETE'])
 def itemDelete(request, pk):
     item = Item.objects.get(id=pk)
     item.delete()
     return Response("ITEM DELETED")
 
-# GETTING ITEMS BASED ON DISTANCE QUERY
+#Calculating the distance between request maker and the Item Object
+EARTH_RADIUS_KM =6371
+@api_view(['GET'])
+def calculate_distance(request):
+    user_lat= float(request.query_params.get('user_latitude'))
+    user_lon= float(request.query_params.get('user_longitude'))
+
+    item_locations = Item.objects.all()
+    distances_km = []
+    #For loop through objects and get their locations
+    for item_location in item_locations:
+        item_id = item_location.id
+        item_lat = float(item_location.latitude)
+        item_lon = float(item_location.longitude)
+        #make copies of every user lat and long to use inside the loop
+        ulat, ulon = user_lat, user_lon
+        #convert decimal degrees to radians
+        ulat, ulon, item_lat, item_lon = map(radians, [ulat, ulon, item_lat, item_lon])
+        #Haversine formula
+        dlon = item_lon - ulon
+        dlat = item_lat - ulat
+        a = sin(dlat/2)**2 + cos(ulat) * cos(item_lat) * sin(dlon/2)**2
+        c = 2 * asin(sqrt(a))
+        distance_km = EARTH_RADIUS_KM * c
+        #append every object distance to an array linked to its respective item id
+        distances_km.append({'item_id': item_id, 'distance_kms': distance_km})
+
+    return Response({'distances': distances_km})
+
+# # GETTING ITEMS BASED ON DISTANCE QUERY
 @api_view(['GET'])
 def itemListDistance(request):
     # Get latitude and longitude from request parameters
@@ -75,7 +102,6 @@ def itemListDistance(request):
     serializer = ItemSerializers(objects, many=True)
     # Return the serialized objects
     return Response(serializer.data)
-
 
 @api_view(['GET'])
 def itemListCategories(request):
